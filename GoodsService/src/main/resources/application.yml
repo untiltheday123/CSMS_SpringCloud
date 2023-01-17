@@ -1,0 +1,51 @@
+#TODO ?????????
+server:
+  port: 8084
+
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/web1.0
+    username: root
+    password: 123456
+  application:
+    name: goodsservice # 服务名称
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # nacos服务地址
+#        cluster-name: BJ #配置集群名称，也就是机房位置
+        cluster-name: SC
+#    gateway:
+#      globalcors:
+#        cors-configurations:
+#          '[/**]': # 匹配所有请求
+#            allowedOrigins: "*" #跨域处理 允许所有的域
+#            allowedMethods: # 支持的方法
+#              - GET
+#              - POST
+#              - PUT
+#              - DELETE
+
+#      jdbc.driverClassName=com.mysql.jdbc.Driver
+#      jdbc.url=jdbc:mysql://localhost:3306/web1.0
+#      #?serverTimezone=GMT&useSSL=false
+#      jdbc.username=root
+#      jdbc.password=123456
+
+
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.goodsservice.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+

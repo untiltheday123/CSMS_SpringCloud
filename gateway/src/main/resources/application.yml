@@ -1,0 +1,54 @@
+server:
+  port: 10010
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+    gateway:
+      routes:
+        - id: orderservice # 路由标示，必须唯一
+          uri: lb://orderservice # 路由的目标地址
+          predicates: # 路由断言，判断请求是否符合规则
+            - Path=/orders/** # 路径断言/orders开头，如果是则符合
+#          filters:
+#            - AddRequestHeader=Truth,ZZY is handsome
+        - id: goodsservice
+          uri: lb://goodsservice
+          predicates:
+            - Path=/goods/**
+        - id: managerservice
+          uri: lb://managerservice
+          predicates:
+            - Path=/managers/**
+        - id: salesmanservice
+          uri: lb://salesmanservice
+          predicates:
+            - Path=/salesmen/**
+        - id: chartservice
+          uri: lb://chartservice
+          predicates:
+            - Path=/charts/**
+        - id: userservice
+          uri: lb://userservice
+          predicates:
+            - Path=/users/**
+      default-filters: # 默认过滤器，对所有路由都生效
+        - AddRequestHeader=Truth, ZZY is handsome
+      # 跨域处理
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          '[/**]': # 匹配所有请求
+            allowedOrigins:  #跨域处理
+              - "http://localhost"
+            allowedMethods: # 支持的方法
+              - "GET"
+              - "POST"
+              - "PUT"
+              - "DELETE"
+              - "OPTIONS"
+            allowedHeaders: "*" # 允许在请求中携带的头信息
+            allowCredentials: true # 是否允许携带cookie
+            maxAge: 360000 # 这次跨域检测的有效期

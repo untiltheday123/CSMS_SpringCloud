@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/order_detail.css">
+    <title>订单详情</title>
+</head>
+<body>
+<div id="app" style="margin:40px auto; overflow-y: scroll">
+
+    <template>
+        <el-page-header @back="goBack" :content="content">
+        </el-page-header>
+
+        <br/>
+
+        <div class="order">
+
+            <div class="step">
+                <el-steps :active="2" align-center>
+                    <el-step title="步骤1" description="商品已下单"></el-step>
+                    <el-step title="步骤2" description="包裹已出库"></el-step>
+                    <el-step title="步骤3" description="包裹正在等待揽收"></el-step>
+                    <el-step title="步骤4" description="包裹运输中"></el-step>
+                    <el-step title="步骤5" description="包裹已到达"></el-step>
+                </el-steps>
+            </div>
+
+            <br/>
+
+            <div class="order_msg">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <h3><span>订单信息</span></h3>
+                        <!--                <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>-->
+                    </div>
+                    <div class="text item">
+<!--                        收货地址：北京市海淀区中关村南大街27号中央民族大学5号楼-->
+                        收货地址：{{addr}}
+                    </div>
+                    <br/>
+                    <div class="text item">
+                        买家留言：一键三连
+                    </div>
+                    <br/>
+                    <div class="text item">
+                        <!--                {{'列表内容 ' + o }}-->
+<!--                        订单编号：O1234567890-->
+                        订单编号：{{orderId}}
+                    </div>
+                    <br/>
+                    <div class="text item">
+                        <!--                {{'列表内容 ' + o }}-->
+                        商家：中央民族大学小卖部
+                    </div>
+                    <br/>
+                </el-card>
+                <el-card class="box-card" style="width: 300px">
+                    <div class="text item">
+                        <h3>订单状态</h3>
+                    </div>
+                    <div class="text item">
+                        {{state}}
+                        <img src="icon/orderDetail_state.png">
+                    </div>
+                </el-card>
+
+            </div>
+
+            <br/>
+
+            <div class="step">
+                <template>
+                    <el-table
+                            :header-cell-style="headFirst"
+                            :data="tableData"
+
+                            style="width: 100%">
+                        <!--                        <el-table-column-->
+                        <!--                                prop="goods_pic"-->
+                        <!--                                label="icon/是否显示商品图片.png"-->
+                        <!--                                width="180">-->
+                        <!--                        </el-table-column>-->
+                        <el-table-column
+                                prop="goods"
+                                label="商品"
+                                width="140"
+                                header-align="center">
+                            <template slot-scope="scope">
+                            <div class="demo-image goods">
+                                <div class="block">
+                                    <!--                                    <span class="demonstration">{{ fit }}</span>-->
+                                    <el-image style="width: 100px; height: 100px" :src="scope.row.proUrl"
+                                              :fit="fit"></el-image>
+                                </div>
+                            </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="proDetail"
+                                label=""
+                                width="200">
+                        </el-table-column>
+                        <el-table-column
+                                prop="proPrice"
+                                label="单价(元)"
+                                width="170"
+                                header-align="center" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="proNum"
+                                label="数量"
+                                width="170"
+                                header-align="center" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="proTotal"
+                                label="总计(元)"
+                                width="170"
+                                header-align="center" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="orderState"
+                                label="状态"
+                                width="170"
+                                header-align="center" align="center">
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </div>
+        </div>
+
+    </template>
+
+</div>
+
+
+<script src="js/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="js/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            proUrl: 'img/cup.jpg',
+            addr: '中央民族大学5号楼',
+            orderId : '00000000',
+            fit: 'contain',
+            state: '订单已完成',
+            content: '订单详情',
+            tableData: [{
+                proUrl: 'img/cup.jpg',
+                proDetail: '111111111111啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
+                price: '1900.00',
+                number: '200',
+                // discount: '无',
+                state: '订单已完成'
+            }, {
+                proUrl: 'img/cup.jpg',
+                proDetail: '22222222啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
+                price: '1900.00',
+                number: '200',
+                // discount: '无',
+                state: '订单已完成'
+            }, {
+                proUrl: 'img/cup.jpg',
+                proDetail: '333333333啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
+                price: '1900.00',
+                number: '200',
+                // discount: '无',
+                state: '订单已完成'
+            }, {
+                proUrl: 'img/cup.jpg',
+                proDetail: '4444444啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
+                price: '1900.00',
+                number: '200',
+                // discount: '无',
+                state: '订单已完成'
+            }]
+        },
+        mounted() {
+            var id = sessionStorage.getItem("orderId");
+            this.orderId = id;
+            var this_ = this;
+
+            axios.get("http://localhost:10010/goods/" + id).then((res) => {
+                if (res.data.code === 20041) {
+                    // alert("查询成功！！！")
+                    // console.log("结果：")
+                    // console.log(res.data.data)
+                    this_.tableData = res.data.data;
+                    // console.log("赋值：")
+                    // console.log(this_.tableData)
+                } else if (res.data.code === 20040) {
+                    alert("商品查找失败！！！")
+                }
+            })
+        }
+        ,
+        methods: {
+            formatter(row, column) {
+                return row.address;
+            },
+            goBack() {
+                $("#right_content").load("sale_order_son.html");
+            },
+            headFirst({row, column, rowIndex, columnIndex}) {
+                // alert("rowIndex="+rowIndex);
+                if (rowIndex === 0) {
+                    if(columnIndex === 0){
+                        this.$nextTick(() => {
+                            if (document.getElementsByClassName(column.id).length !== 0) {
+                                document.getElementsByClassName(column.id)[0].setAttribute('colSpan', 2)
+                            }
+                        })
+                    }
+                }
+                if(rowIndex === 0){
+                    if(columnIndex === 1){
+                        return {display: 'none'}
+                        //这里为了是将第二列的表头隐藏，就形成了合并表头的效果
+                    }
+                }
+            },
+            // arraySpanMethod({row, column, rowIndex, columnIndex}) {
+            //     row[1].colSpan=2;
+            //     row[2].colSpan=0;
+            // }
+        }
+    })
+</script>
+</body>
+</html>

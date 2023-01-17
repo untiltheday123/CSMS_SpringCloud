@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公司销售管理系统</title>
+
+    <!--     引入样式-->
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<div id="app" style="margin: 40px auto;overflow-y: scroll">
+    <template>
+        <div class="demo-input-size" id="search_User" style="display: none;margin: 0 auto">
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入姓名"
+                    v-model="inputName"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入用户名"
+                    v-model="inputUser"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入ID"
+                    v-model="inputId"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入电话"
+                    v-model="inputPhone"
+                    clearable>
+            </el-input>
+            <el-button type="primary" icon="el-icon-search" style="margin-left: 30px" @click="query_clientBySaleId">搜索</el-button>
+        </div>
+        <el-table ref="filterTable" :data="tableData" style="width: 100%">
+
+            <el-table-column type="index" width="50" header-align="center" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="userId" sortable label="客户ID" width="150" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="userName" label="姓名" width="130" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="userUsername" sortable label="用户名" width="170" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="userSex" sortable label="性别" width="90" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="userPhone" sortable label="电话" width="170" header-align="center" align="center">
+            </el-table-column>
+            <!--            <el-table-column prop="user_address" sortable label="收货地址" width="170" header-align="center" align="center">-->
+            <!--            </el-table-column>-->
+            <el-table-column prop="saleId" sortable label="销售ID" width="150" header-align="center" align="center">
+            </el-table-column>
+
+            <el-table-column label="操作" width="170" header-align="center" align="center">
+                <template slot-scope="scope">
+                    <el-button
+                            size="mini"
+                            @click="handleEdit(scope.$index, scope.row)">编辑
+                    </el-button>
+                    <el-button
+                            size="mini"
+                            type="danger"
+                            @click="handleDelete(scope.$index, scope.row)">删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <!--            修改客户的对话框-->
+        <el-dialog
+                title="修改客户信息"
+                :visible.sync="editDialogVisible"
+                width="30%"
+                append-to-body
+        >
+            <!--            先不定规则-->
+            <!--            <el-form :model="eachSalesForm" :rules="eachSalesFormRules" ref="eachSalesFormRef" label-width="70px">-->
+            <el-form :model="eachClientForm" label-width="70px">
+                <el-form-item label="姓名" prop="userName">
+                    <el-input v-model="eachClientForm.userName"></el-input>
+                </el-form-item>
+                <el-form-item label="用户名" prop="userUsername">
+                    <el-input v-model="eachClientForm.userUsername"></el-input>
+                </el-form-item>
+                <el-form-item label="ID号" prop="userId">
+                    <el-input v-model="eachClientForm.userId" disabled></el-input>
+                </el-form-item>
+                <el-form-item label="性别" prop="userSex">
+                    <el-input v-model="eachClientForm.userSex"></el-input>
+                </el-form-item>
+                <el-form-item label="电话" prop="userPhone">
+                    <el-input v-model="eachClientForm.userPhone"></el-input>
+                </el-form-item>
+                <el-form-item label="收货地址" prop="userAddress">
+                    <el-input v-model="eachClientForm.userAddress"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="userPassword">
+                    <el-input v-model="eachClientForm.userPassword"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editClient">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <br/>
+        <!--        页码-->
+        <el-pagination background layout="prev, pager, next" @current-change="handleCurrentChange"
+                       :total="totalCount">
+        </el-pagination>
+    </template>
+</div>
+
+<script src="js/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="js/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {
+            inputName: '',
+            inputUser: '',
+            inputId: '',
+            inputPhone: '',
+            inputSaleId: '',
+            totalCount: 400,
+            currentPage: 1,
+            tableData: [{
+                userName: '王小虎',
+                userId: '123456',
+                userSex: '男',
+                userPhone: '12345678901',
+                userAddress: '上海市普陀区金沙江路 1518 弄'
+            }],
+            //控制修改用户对话框的现实与隐藏
+            editDialogVisible: false,
+            eachClientForm: {
+                userName: '王小虎',
+                userId: '123456',
+                userSex: '男',
+                userPhone: '12345678901',
+                userPassword: '',
+                userUsername: '',
+                userAddress: ''
+            },
+            //修改表单的验证规则对象
+            eachClientFormRules: {},
+            allInfo: [{
+                // sale_password: '',
+                // sale_username: ''
+            }]
+
+        },
+        mounted() {
+            this.selectClient(1);
+        },
+        methods: {
+            query_clientBySaleId(){
+                this.inputSaleId = sessionStorage.getItem("saleId");
+                var param = "?query";
+                param += "&userName=" + this.inputName;
+                param += "&userUsername=" + this.inputUser;
+                param += "&userId=" + this.inputId;
+                param += "&userPhone=" + this.inputPhone;
+                param += "&saleId=" + this.inputSaleId;
+                this.selectClientAll(param,1);
+            },
+            selectClient(page) {
+                var id = sessionStorage.getItem("saleId");
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/users/" + id + "/" + page).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.totalCount = res.data.data.total
+                        this_.tableData = res.data.data.records;
+                        this_.allInfo = res.data.data.records;
+                    } else if (res.data.code === 20040) {
+                        alert("客户查找失败！！！")
+                    }
+                })
+            },
+            // 条件查询销售人员
+            selectClientAll(param,page) {
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/users/queryUserCondition/"+ page + param).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.tableData = res.data.data.records;
+                        this_.totalCount = res.data.data.total;
+                        this_.allInfo = res.data.data.records;
+                    }
+                })
+            },
+            // clearFilter() {
+            //     this.$refs.filterTable.clearFilter();
+            // },
+
+            handleCurrentChange(val) {
+                // console.log(`当前页: ${val}`);
+                // this.currentPage = val;
+                this.selectClient(val);
+            },
+
+            // eachClientForm: {
+            //     "user_name": "王小虎",
+            //     "user_id": "123456",
+            //     "user_sex": "男",
+            //     "user_phone": "12345678901",
+            //     "user_password": "",
+            //     "user_username": "",
+            //     "user_address": ""
+            // },
+            handleEdit(index, row) {
+                this.editDialogVisible = true;
+
+                this.eachClientForm.user_password = this.allInfo[index].user_password;
+                this.eachClientForm.user_username = this.allInfo[index].user_username;
+                this.eachClientForm.user_name = row.user_name;
+                this.eachClientForm.user_id = row.user_id;
+                this.eachClientForm.user_sex = row.user_sex;
+                this.eachClientForm.user_phone = row.user_phone;
+                this.eachClientForm.user_address = row.user_address;
+                console.log(index, row);
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
+            },
+            //修改提交
+            editClient() {
+                var this_ = this;
+                axios.put("http://localhost:10010/users", this_.eachClientForm).then((res) => {
+                    if (res.data.code === 20031) {
+                        this_.editDialogVisible = false;
+                        this.selectClient(this.currentPage);
+                        // this_.tableData = res.data.data;
+                    } else {
+                        alert("修改失败！！！");
+                    }
+                })
+            }
+        }
+    })
+
+    var searchClick = true;
+    //true表示不显示
+    $("#search").click(function () {
+        // console.log(searchClick)
+        searchClick = !searchClick;
+        if (searchClick)
+            $("#search_User").css("display", "none");
+        else
+            $("#search_User").css("display", "block");
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- https://codepen.io/danielkvist/pen/LYNVyPL -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/login.css">
+    <title>公司销售管理系统</title>
+
+</head>
+
+<body>
+<div class="container right-panel-active">
+    <!-- 销售员登录 -->
+    <div class="container__form container--signin">
+        <form class="form" id="form2" method="post">
+            <h2 class="form__title">销售员登录</h2>
+            <input type="text" placeholder="Username" class="input" id="username2"/>
+            <input type="password" placeholder="Password" class="input" id="password2"/>
+            <a href="#" class="link">Forgot your password?</a>
+            <input type="button" id="btn2" class="btn" onclick="submit_('2')" value="登 录">
+<!--            <el-button type="text" @click="open"></el-button>-->
+        </form>
+    </div>
+
+    <!--     管理员登录 -->
+    <div class="container__form container--signup">
+        <form class="form" id="form1" method="post">
+            <h2 class="form__title">管理员登录</h2>
+            <input type="text" placeholder="Username" class="input" id="username1"/>
+            <!-- <input type="email" placeholder="Email" class="input" /> -->
+            <input type="password" placeholder="Password" class="input"  id="password1"/>
+            <a href="#" class="link">Forgot your password?</a>
+            <input type="button" id="btn1" class="btn" onclick="submit_('1')" value="登 录">
+        </form>
+    </div>
+    <!-- Overlay -->
+    <div class="container__overlay">
+        <div class="overlay">
+            <div class="overlay__panel overlay--left">
+                <button class="btn" id="signIn">销售员登录</button>
+            </div>
+            <div class="overlay__panel overlay--right">
+                <button class="btn" id="signUp">管理员登录</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/jquery-3.3.1.js"></script>
+<script src="js/getParameter.js"></script>
+
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/login.js"></script>
+
+
+</body>
+
+</html>

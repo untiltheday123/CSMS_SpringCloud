@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/axios-0.18.0.js"></script>
+    <style>
+        .center {
+            width: 1200px;
+            height: 500px;
+            display: flex;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+<div class="center">
+    <div id="main1" style="width: 600px;height:500px;">
+        <script type="text/javascript">
+
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main1'));
+
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: '销售员额度',
+                    // subtext: 'Fake Data',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                // legend: {
+                //     left: 'center',
+                //     top: 'center'
+                // data: [
+                //     'rose1',
+                //     'rose2',
+                //     'rose3',
+                //     'rose4',
+                //     'rose5',
+                //     'rose6',
+                //     'rose7',
+                //     'rose8'
+                // ]
+                // },
+                //隐藏右上角按钮
+                toolbox: {
+                    show: false,
+                    // feature: {
+                    //     mark: {show: true},
+                    //     dataView: {show: true, readOnly: false},
+                    //     restore: {show: true},
+                    //     saveAsImage: {show: true}
+                    // }
+                },
+                series: [
+                    {
+                        name: 'Radius Mode',
+                        type: 'pie',
+                        radius: [20, 140],
+                        center: ['50%', '50%'],
+                        roseType: 'radius',
+                        itemStyle: {
+                            borderRadius: 5
+                        },
+                        // label: {
+                        //     show: false
+                        // },
+                        // emphasis: {
+                        //     label: {
+                        //         show: true
+                        //     }
+                        // },
+                        data: [
+                            {value: 30, name: 'rose 1'},
+                            {value: 28, name: 'rose 2'},
+                            {value: 26, name: 'rose 3'},
+                            {value: 24, name: 'rose 4'},
+                            {value: 22, name: 'rose 5'}
+                            // { value: 20, name: 'rose 6' },
+                            // { value: 18, name: 'rose 7' },
+                            // { value: 16, name: 'rose 8' }
+                        ]
+                    }
+                ]
+            };
+
+            var this_ = this
+
+            async function querySaleTotal() {
+                //要用同步,axios只有异步，同步得借助async/await
+                var res = await axios.get("http://localhost:10010/charts/querySaleTotal")
+                if (res.data.code === 20041) {
+                    res.data.data.forEach((item, index) => {
+                        this_.option.series[0].data[index] = item
+                        this_.option.series[0].data[index].name += "--" + parseInt(index + 1)
+                    })
+                } else if (res.data.code === 20040) {
+                    alert("查找失败！！！")
+                }
+
+                // 使用刚指定的配置项和数据显示图表。
+                // console.log("第二个" + option)
+                myChart.setOption(option);
+            }
+
+            querySaleTotal();
+        </script>
+    </div>
+    <div id="main2" style="width: 600px;height:500px;">
+        <script type="text/javascript">
+
+            // 基于准备好的dom，初始化echarts实例
+            var myChart_ = echarts.init(document.getElementById('main2'));
+
+            // 指定图表的配置项和数据
+            var option_ = {
+                title: {
+                    text: '销售员客户数量',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                //隐藏右上角按钮
+                toolbox: {
+                    show: false,
+                },
+                series: [
+                    {
+                        name: 'Radius Mode',
+                        type: 'pie',
+                        radius: [20, 140],
+                        center: ['50%', '50%'],
+                        roseType: 'radius',
+                        itemStyle: {
+                            borderRadius: 5
+                        },
+                        data: [
+                            {value: 30, name: 'rose 1'},
+                            {value: 28, name: 'rose 2'},
+                            {value: 26, name: 'rose 3'},
+                            {value: 24, name: 'rose 4'},
+                            {value: 22, name: 'rose 5'}
+                        ]
+                    }
+                ]
+            };
+
+            var this_ = this
+
+            async function queryUserNum() {
+                //要用同步,axios只有异步，同步得借助async/await
+                var res = await axios.get("http://localhost:10010/charts/queryUserNum")
+                if (res.data.code === 20041) {
+                    res.data.data.forEach((item, index) => {
+                        this_.option_.series[0].data[index] = item
+                        this_.option_.series[0].data[index].name += "--" + parseInt(index + 1)
+                    })
+                } else if (res.data.code === 20040) {
+                    alert("查找失败！！！")
+                }
+
+                // 使用刚指定的配置项和数据显示图表。
+                // console.log("第二个" + option)
+                myChart_.setOption(option_);
+            }
+
+            queryUserNum();
+        </script>
+    </div>
+</div>
+</body>
+</html>

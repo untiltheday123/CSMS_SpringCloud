@@ -1,0 +1,21 @@
+.order{
+    background-color: rgb(255, 255, 255);
+    padding: 10px
+}
+
+.step{
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)
+}
+
+.order_msg{
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    padding: 10px
+}
+
+.goods {
+    float: left;
+    margin-right: 15px;
+}

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="css/index.css">
+    <title>Title</title>
+</head>
+
+<body>
+<div id="app" style="margin: 40px auto;overflow-y: scroll">
+    <template>
+        <!--        <el-button @click="resetDateFilter">清除日期过滤器</el-button>-->
+        <!--        <el-button @click="clearFilter">清除所有过滤器</el-button>-->
+        <div class="demo-input-size" id="search_Salesman" style="display: none;margin: 0 auto">
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入姓名"
+                    v-model="inputName"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入用户名"
+                    v-model="inputUser"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入工号"
+                    v-model="inputId"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 200px;margin-right: 30px"
+                    placeholder="请输入电话"
+                    v-model="inputPhone"
+                    clearable>
+            </el-input>
+            <el-button type="primary" icon="el-icon-search" style="margin-left: 30px" @click="query_salesman">搜索</el-button>
+        </div>
+        <el-table ref="filterTable" :data="tableData" style="width: 100%">
+
+            <el-table-column type="index" width="50" header-align="center" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="saleName" label="姓名" width="130" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="saleUsername" label="用户名" width="130" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="saleId" sortable label="工号" width="150" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="saleSex" sortable label="性别" width="80" header-align="center" align="center">
+            </el-table-column>
+            <el-table-column prop="salePhone" sortable label="电话" width="170" header-align="center" align="center">
+            </el-table-column>
+
+            <el-table-column prop="manaOrd" label="管理订单" width="150" header-align="center" align="center">
+                <template slot-scope="scope">
+                    <el-button type="info" round plain @click="view_orderDetails(scope.row)" size="medium">查看详情
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="manaGes" label="管理客户" width="150" header-align="center" align="center">
+                <template slot-scope="scope">
+                    <el-button type="info" round plain @click="view_clientDetails(scope.row)" size="medium">查看详情
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="190" header-align="center" align="center">
+                <template slot-scope="scope">
+                    <el-button
+                            size="mini"
+                            @click="handleEdit(scope.$index, scope.row)">编辑
+                    </el-button>
+                    <el-button
+                            size="mini"
+                            type="danger"
+                            @click="handleDelete(scope.$index, scope.row)">删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <!--            修改销售的对话框-->
+        <el-dialog
+                title="修改销售信息"
+                :visible.sync="editDialogVisible"
+                width="30%"
+                append-to-body
+        >
+            <!--            先不定规则-->
+            <!--            <el-form :model="eachSalesForm" :rules="eachSalesFormRules" ref="eachSalesFormRef" label-width="70px">-->
+            <el-form :model="eachSalesForm" label-width="70px">
+                <el-form-item label="姓名" prop="saleName">
+                    <el-input v-model="eachSalesForm.saleName" disabled></el-input>
+                </el-form-item>
+                <el-form-item label="用户名" prop="saleUsername">
+                    <el-input v-model="eachSalesForm.saleUsername"></el-input>
+                </el-form-item>
+                <el-form-item label="工号" prop="saleId">
+                    <el-input v-model="eachSalesForm.saleId" disabled></el-input>
+                </el-form-item>
+                <el-form-item label="性别" prop="saleSex">
+                    <el-input v-model="eachSalesForm.saleSex"></el-input>
+                </el-form-item>
+                <el-form-item label="电话" prop="salePhone">
+                    <el-input v-model="eachSalesForm.salePhone"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="salePassword">
+                    <el-input v-model="eachSalesForm.salePassword"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editSalesman">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <br/>
+        <!--        页码-->
+        <el-pagination background layout="prev, pager, next" @current-change="handleCurrentChange"
+                       :total="totalCount">
+        </el-pagination>
+    </template>
+</div>
+<script src="js/jquery-3.3.1.js"></script>
+<script src="js/getParameter.js"></script>
+<script src="js/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="js/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {
+            inputName: '',
+            inputUser: '',
+            inputId: '',
+            inputPhone: '',
+            // tableData: [],
+            totalCount: 400,
+            currentPage: 1,
+            tableData: [{
+                saleUsername: '王小虎',
+                saleId: '123456',
+                saleSex: '男',
+                salePhone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '公司'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '家'
+            }, {
+                saleUsername: '王小虎',
+                saleId: '124456',
+                sex: '男',
+                phone: '12345678901',
+                manaOrd: '点我查看',
+                manaGes: '点我查看',
+                // address: '上海市普陀区金沙江路 1518 弄',
+                // tag: '公司'
+            }],
+            //控制修改用户对话框的现实与隐藏
+            editDialogVisible: false,
+            eachSalesForm: {
+                saleName: '王小虎',
+                saleId: '123456',
+                saleSex: '男',
+                salePhone: '12345678901',
+                salePassword: '',
+                saleUsername: ''
+            },
+            //修改表单的验证规则对象
+            eachSalesFormRules: {},
+            allInfo: [{
+                salePassword: '',
+                saleUsername: ''
+            }]
+
+        },
+        mounted() {
+            this.selectSalesman(1);
+        },
+        methods: {
+            query_salesman(){
+                var param = "?query";
+                param += "&saleName=" + this.inputName;
+                param += "&saleUsername=" + this.inputUser;
+                param += "&saleId=" + this.inputId;
+                param += "&salePhone=" + this.inputPhone;
+                this.selectSalesmanAll(param,1);
+            },
+            selectSalesman(page) {
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/salesmen/" + page).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.totalCount = res.data.data.total;
+                        this_.tableData = res.data.data.records;
+                        this_.allInfo = res.data.data.records;
+                    }
+                })
+            },
+            // 条件查询销售人员
+            selectSalesmanAll(param,page) {
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/salesmen/querySalesmanCondition/"+ page + param).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.tableData = res.data.data.records;
+                        this_.totalCount = res.data.data.total;
+                        this_.allInfo = res.data.data.records;
+                    }
+                })
+            },
+            handleCurrentChange(val) {
+                // console.log(`当前页: ${val}`);
+                // this.currentPage = val;
+                this.selectSalesman(val);
+            },
+            view_orderDetails(row) {
+                // console.log(row);
+                sessionStorage.setItem("saleName", row.saleName)
+                sessionStorage.setItem("saleId", row.saleId)
+                $("#right_content").load("manager_saleId_order.html");
+            },
+            view_clientDetails(row) {
+                // console.log(row);
+                sessionStorage.setItem("saleName", row.saleName)
+                sessionStorage.setItem("saleId", row.saleId)
+                $("#right_content").load("manager_saleId_client.html");
+            },
+            handleEdit(index, row) {
+
+                this.eachSalesForm.salePassword = this.allInfo[index].salePassword;
+
+                this.editDialogVisible = true;
+
+                this.eachSalesForm.saleUsername = row.saleUsername;
+                this.eachSalesForm.saleName = row.saleName;
+                this.eachSalesForm.saleId = row.saleId;
+                this.eachSalesForm.saleSex = row.saleSex;
+                this.eachSalesForm.salePhone = row.salePhone;
+                console.log(index, row);
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
+            },
+            //修改提交
+            editSalesman() {
+                var this_ = this;
+                axios.put("http://localhost:10010/salesmen", this_.eachSalesForm).then((res) => {
+                    if (res.data.code === 20031) {
+                        this_.editDialogVisible = false;
+                        this.selectSalesman(this.currentPage);
+                        // this_.tableData = res.data.data;
+                    } else {
+                        alert("修改失败！！！");
+                    }
+                })
+            }
+        }
+    })
+
+    var searchClick = true;
+    //true表示不显示
+    $("#search").click(function (){
+        // console.log(searchClick)
+        searchClick = !searchClick;
+        if(searchClick)
+            $("#search_Salesman").css("display","none");
+        else
+            $("#search_Salesman").css("display","block");
+    })
+
+</script>
+</body>
+
+</html>
+

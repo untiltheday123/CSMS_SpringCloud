@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公司销售管理系统</title>
+
+    <!--     引入样式-->
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<div id="app" style="margin: 40px auto;overflow-y: scroll">
+    <template>
+        <div class="demo-input-size" id="search_Order" style="display: none">
+            <el-input
+                    style="width: 180px;margin-right: 30px"
+                    placeholder="请输入订单ID"
+                    v-model="inputOrderId"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 180px;margin-right: 30px"
+                    placeholder="请输入交易日期"
+                    v-model="inputOrderDate"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 180px;margin-right: 30px"
+                    placeholder="请输入订单状态"
+                    v-model="inputOrderState"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 180px;margin-right: 30px"
+                    placeholder="请输入销售ID"
+                    v-model="inputSaleId"
+                    clearable>
+            </el-input>
+            <el-input
+                    style="width: 180px;margin-right: 30px"
+                    placeholder="请输入客户ID"
+                    v-model="inputUserId"
+                    clearable>
+            </el-input>
+            <el-button type="primary" icon="el-icon-search" style="margin-left: 20px" @click="query_order">搜索
+            </el-button>
+        </div>
+<!--        <div style="margin: 0 auto">-->
+            <el-table
+                    :data="tableData"
+                    style="width: 100%"
+                    :default-sort="{prop: 'date', order: 'descending'}"
+            >
+                <el-table-column type="index"
+                                 width="80">
+                </el-table-column>
+                <el-table-column
+                        prop="orderId"
+                        label="订单ID"
+                        sortable
+                        width="150"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="orderTotal"
+                        label="交易总金额(元)"
+                        sortable
+                        width="150"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="orderTime"
+                        label="日期"
+                        sortable
+                        width="130"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="orderState"
+                        label="订单状态"
+                        sortable
+                        width="130"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="saleId"
+                        label="销售ID"
+                        sortable
+                        width="140"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="userId"
+                        label="客户ID"
+                        sortable
+                        width="140"
+                        header-align="center" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="orderDetails"
+                        label="订单详情"
+                        width="150"
+                        header-align="center" align="center">
+                    <template slot-scope="scope">
+                        <!--                <el-link @click="view_orderDetail()" target="_blank">查看详情</el-link>-->
+                        <el-button type="info" round plain @click="view_orderDetail(scope.row.orderId)" size="medium">
+                            查看详情
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" header-align="center" align="center">
+                    <template slot-scope="scope">
+                        <el-button
+                                size="mini"
+                                type="danger"
+                                @click="handleDelete(scope.$index, scope.row)">删除
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <el-dialog
+                    title="删除订单"
+                    :visible.sync="deleteDialogVisible"
+                    width="30%"
+                    append-to-body
+            >
+                <span>您确认要删除这条订单吗</span>
+                <span slot="footer" class="dialog-footer">
+<!--                <template slot-scope="scope">-->
+                    <el-button @click="deleteDialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="deleteOrder">确 定</el-button>
+                    <!--                </template>-->
+            </span>
+            </el-dialog>
+
+
+            <br/>
+            <!--        页码-->
+            <el-pagination background layout="prev, pager, next" @current-change="handleCurrentChange"
+                           :total="totalCount">
+            </el-pagination>
+<!--        </div>-->
+    </template>
+
+</div>
+
+<script src="js/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="js/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            inputOrderId: '',
+            inputOrderDate: '',
+            inputOrderState: '',
+            inputSaleId: '',
+            inputUserId: '',
+            currentId: '',
+            deleteDialogVisible: false,
+            totalCount: 400,
+            currentPage: 1,
+            tableData: [{
+                date: '2016-05-02',
+                userName: '王小虎',
+                address: '上海市普陀区金沙江路 1518 弄'
+            }, {
+                date: '2016-05-04',
+                userName: '王小虎',
+                address: '上海市普陀区金沙江路 1517 弄'
+            }, {
+                date: '2016-05-01',
+                userName: '王小虎',
+                address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+                date: '2016-05-03',
+                userName: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }]
+        },
+        mounted() {
+            this.selectOrder(1);
+        },
+        methods: {
+            query_order() {
+                var param = "?query";
+                param += "&orderId=" + this.inputOrderId;
+                param += "&orderTime=" + this.inputOrderDate;
+                param += "&orderState=" + this.inputOrderState;
+                param += "&saleId=" + this.inputSaleId;
+                param += "&userId=" + this.inputUserId;
+                this.selectOrderAll(param, 1);
+            },
+            selectOrder(page) {
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/orders/" + page).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.totalCount = res.data.data.total
+                        this_.tableData = res.data.data.records;
+                        // console.log(this_.tableData)
+                        this_.allInfo = res.data.data.records;
+
+                    }
+                })
+            },
+            selectOrderAll(param, page) {
+                this.currentPage = page;
+                var this_ = this
+                axios.get("http://localhost:10010/orders/queryOrderCondition/" + page + param).then((res) => {
+                    if (res.data.code === 20041) {
+                        this_.tableData = res.data.data.records;
+                        this_.totalCount = res.data.data.total;
+                        // this_.allInfo = res.data.data.records;
+                    }
+                })
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                // this.currentPage = val;
+                this.selectOrder(val);
+            },
+            formatter(row, column) {
+                return row.address;
+            },
+            view_orderDetail(orderId) {
+                sessionStorage.setItem("orderId", orderId);
+                $("#right_content").load("order_detail2.html");
+            },
+            handleDelete(index, row) {
+                // alert("11111")
+                this.currentId = row.orderId;
+                this.deleteDialogVisible = true;
+            },
+            deleteOrder() {
+                var this_ = this;
+                // alert(this.currentId)
+                axios.delete("http://localhost:10010/orders/" + this.currentId).then((res) => {
+                    if (res.data.code === 20021) {
+                        this_.deleteDialogVisible = false;
+                        this.selectOrder(this.currentPage);
+                        // this_.tableData = res.data.data;
+                    } else {
+                        alert("修改失败！！！");
+                    }
+                })
+            }
+        }
+    })
+
+
+    var searchClick = true;
+    //true表示不显示
+    $("#search").click(function () {
+        // console.log(searchClick)
+        searchClick = !searchClick;
+        if (searchClick)
+            $("#search_Order").css("display", "none");
+        else
+            $("#search_Order").css("display", "block");
+    })
+</script>
+</body>
+</html>
